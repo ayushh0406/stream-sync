@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+websockets
+redis
+pydantic
+pymongo
+psycopg2
+sqlalchemy
+aioredis
+hls.js
+ffmpeg-python
+python-dotenv
+gunicor
