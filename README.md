@@ -17,7 +17,7 @@
 ✅ **Real-time WebSockets Sync** – Ensuring frame-perfect alignment.  
 ✅ **Adaptive Streaming** – Adjusts quality based on network conditions.  
 ✅ **Smart Caching & CDN Optimization** – Reduces compute and storage costs.  
-✅ **Live Chat & Reactions** – Engaging real-time interactions.  
+✅ **Live Chat & Reactions** – Engaging real-time interactions..  
 
 ## 🏗 Tech Stack
 ### **Frontend:**
