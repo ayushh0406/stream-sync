@@ -9,10 +9,29 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
 
   const handleSignup = async () => {
-    // TODO: Call backend API for signup
     setError("");
+    setSuccess("");
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:8000/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.detail || "Signup failed");
+      } else {
+        setSuccess("Signup successful! You can now login.");
+      }
+    } catch (err) {
+      setError("Network error");
+    }
+    setLoading(false);
   };
 
   return (
@@ -34,7 +53,10 @@ export default function SignupPage() {
           className="mb-4"
         />
         {error && <div className="text-red-500 mb-2">{error}</div>}
-        <Button onClick={handleSignup} className="w-full mb-2">Sign Up</Button>
+        {success && <div className="text-green-500 mb-2">{success}</div>}
+        <Button onClick={handleSignup} className="w-full mb-2" disabled={loading}>
+          {loading ? "Signing up..." : "Sign Up"}
+        </Button>
         <div className="text-center text-sm mt-2">
           Already have an account? <Link href="/login" className="text-primary underline">Login</Link>
         </div>
