@@ -9,10 +9,31 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
 
   const handleLogin = async () => {
-    // TODO: Call backend API for login
     setError("");
+    setSuccess("");
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:8000/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ username: email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.detail || "Login failed");
+      } else {
+        setSuccess("Login successful!");
+        localStorage.setItem("token", data.access_token);
+        // Optionally redirect or update global auth state
+      }
+    } catch (err) {
+      setError("Network error");
+    }
+    setLoading(false);
   };
 
   return (
@@ -34,7 +55,10 @@ export default function LoginPage() {
           className="mb-4"
         />
         {error && <div className="text-red-500 mb-2">{error}</div>}
-        <Button onClick={handleLogin} className="w-full mb-2">Login</Button>
+        {success && <div className="text-green-500 mb-2">{success}</div>}
+        <Button onClick={handleLogin} className="w-full mb-2" disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
+        </Button>
         <div className="text-center text-sm mt-2">
           Don't have an account? <Link href="/signup" className="text-primary underline">Sign up</Link>
         </div>
