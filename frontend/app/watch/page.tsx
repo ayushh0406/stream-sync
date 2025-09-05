@@ -45,7 +45,8 @@ export default function WatchPage() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [reactions, setReactions] = useState<string[]>([]);
-  const [latencyData, setLatencyData] = useState([]);
+  const [streamUrl, setStreamUrl] = useState<string>("https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8");
+  const [latencyData, setLatencyData] = useState<{ value: number }[]>([]);
   const [cdnMetrics, setCdnMetrics] = useState({
     requests: 0,
     bandwidth: 0,
@@ -160,6 +161,17 @@ export default function WatchPage() {
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Video Section */}
         <div className="lg:col-span-2 space-y-4">
+          {/* Stream URL Settings */}
+          <div className="mb-4 flex gap-2 items-center">
+            <Input
+              type="text"
+              value={streamUrl}
+              onChange={e => setStreamUrl(e.target.value)}
+              placeholder="Enter HLS stream URL"
+              className="w-[400px]"
+            />
+            <Button onClick={() => setStreamUrl(streamUrl)} variant="secondary">Set Stream</Button>
+          </div>
           <Card className="overflow-hidden border-4 border-primary shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative">
             <video
               ref={videoRef}
