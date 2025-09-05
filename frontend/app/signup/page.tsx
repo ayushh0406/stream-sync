@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import Spinner from "@/components/ui/spinner";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -55,7 +56,7 @@ export default function SignupPage() {
         {error && <div className="text-red-500 mb-2">{error}</div>}
         {success && <div className="text-green-500 mb-2">{success}</div>}
         <Button onClick={handleSignup} className="w-full mb-2" disabled={loading}>
-          {loading ? "Signing up..." : "Sign Up"}
+          {loading ? <Spinner /> : "Sign Up"}
         </Button>
         <div className="text-center text-sm mt-2">
           Already have an account? <Link href="/login" className="text-primary underline">Login</Link>

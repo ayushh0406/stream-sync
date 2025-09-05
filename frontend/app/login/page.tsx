@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import Spinner from "@/components/ui/spinner";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -11,6 +12,8 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
+  const { login } = require("@/lib/auth-context").useAuth();
+  const router = require("next/navigation").useRouter();
 
   const handleLogin = async () => {
     setError("");
@@ -27,8 +30,8 @@ export default function LoginPage() {
         setError(data.detail || "Login failed");
       } else {
         setSuccess("Login successful!");
-        localStorage.setItem("token", data.access_token);
-        // Optionally redirect or update global auth state
+        login(data.access_token, email);
+        router.push("/watch");
       }
     } catch (err) {
       setError("Network error");
@@ -57,7 +60,7 @@ export default function LoginPage() {
         {error && <div className="text-red-500 mb-2">{error}</div>}
         {success && <div className="text-green-500 mb-2">{success}</div>}
         <Button onClick={handleLogin} className="w-full mb-2" disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
+          {loading ? <Spinner /> : "Login"}
         </Button>
         <div className="text-center text-sm mt-2">
           Don't have an account? <Link href="/signup" className="text-primary underline">Sign up</Link>

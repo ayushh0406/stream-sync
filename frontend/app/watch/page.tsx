@@ -33,6 +33,13 @@ interface Participant {
 }
 
 export default function WatchPage() {
+  const { token } = require("@/lib/auth-context").useAuth();
+  const router = require("next/navigation").useRouter();
+  // Redirect to login if not authenticated
+  if (typeof window !== "undefined" && !token) {
+    router.push("/login");
+    return null;
+  }
   const videoRef = useRef<HTMLVideoElement>(null);
   const chatInputRef = useRef<HTMLInputElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);

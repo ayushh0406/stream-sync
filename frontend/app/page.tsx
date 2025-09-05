@@ -6,31 +6,24 @@ import { Play, Users, Zap } from "lucide-react";
 import Link from "next/link";
 
 export default function Home() {
+  const { user, logout } = require("@/lib/auth-context").useAuth();
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <div className="relative px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl py-24 sm:py-32">
-          <div className="text-center">
-            <div className="relative z-10">
-              <div className="absolute -inset-1 rounded-lg bg-primary/20 blur"></div>
-              <h1 className="text-6xl font-black tracking-tight text-primary sm:text-8xl relative z-20">
-                StreamSync
-              </h1>
-            </div>
-            <p className="mt-6 text-xl leading-8 text-muted-foreground max-w-2xl mx-auto">
-              Next-gen synchronized streaming platform. Watch together, react together, experience together.
-            </p>
-            <div className="mt-10 flex items-center justify-center gap-x-6">
-              <Link href="/watch">
-                <Button size="lg" className="text-lg px-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-primary hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
-                  <Play className="mr-2 h-5 w-5" /> Join Stream
-                </Button>
-              </Link>
-            </div>
+      {/* Header */}
+      <div className="w-full flex justify-between items-center px-8 py-4 border-b-2 border-primary bg-muted">
+        <h1 className="text-3xl font-bold text-primary">StreamSync</h1>
+        {user ? (
+          <div className="flex items-center gap-4">
+            <span className="font-mono text-sm">{user}</span>
+            <Button variant="outline" size="sm" onClick={logout}>Logout</Button>
           </div>
-        </div>
+        ) : (
+          <Link href="/login">
+            <Button variant="default" size="sm">Login</Button>
+          </Link>
+        )}
       </div>
+      {/* ...existing code... */}
 
       {/* Features Section */}
       <div className="py-24 sm:py-32 bg-muted">
