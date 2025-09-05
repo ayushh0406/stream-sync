@@ -1,6 +1,7 @@
 import { io } from 'socket.io-client';
 
-export const socket = io('https://api.streamsync.dev', {
+const SOCKET_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : 'https://api.streamsync.dev';
+export const socket = io(SOCKET_URL, {
   autoConnect: false,
   reconnection: true,
   reconnectionAttempts: 5,
