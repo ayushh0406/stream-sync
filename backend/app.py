@@ -6,6 +6,7 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from pydantic import BaseModel
 import time
+from db import get_db
 import json
 
 app = FastAPI()
@@ -23,6 +24,14 @@ class UserIn(BaseModel):
     email: str
     password: str
 
+class ChatMessage(BaseModel):
+    message: str
+    timestamp: int
+
+class Reaction(BaseModel):
+    emoji: str
+    timestamp: int
+
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
@@ -36,19 +45,29 @@ def create_access_token(data: dict, expires_delta: int = None):
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 def authenticate_user(email: str, password: str):
-    user = users_db.get(email)
-    if not user:
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT * FROM users WHERE email=?", (email,))
+    row = c.fetchone()
+    conn.close()
+    if not row:
         return False
-    if not verify_password(password, user.hashed_password):
+    if not verify_password(password, row["hashed_password"]):
         return False
-    return user
+    return User(email=row["email"], hashed_password=row["hashed_password"])
 
 @app.post("/signup")
 async def signup(user: UserIn):
-    if user.email in users_db:
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT * FROM users WHERE email=?", (user.email,))
+    if c.fetchone():
+        conn.close()
         raise HTTPException(status_code=400, detail="Email already registered")
     hashed_password = get_password_hash(user.password)
-    users_db[user.email] = User(email=user.email, hashed_password=hashed_password)
+    c.execute("INSERT INTO users (email, hashed_password) VALUES (?, ?)", (user.email, hashed_password))
+    conn.commit()
+    conn.close()
     return {"msg": "Signup successful"}
 
 @app.post("/login")
@@ -58,6 +77,52 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     access_token = create_access_token(data={"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
+
+@app.post("/chat")
+async def post_chat(message: ChatMessage, token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email = payload.get("sub")
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("INSERT INTO chat (user_email, message, timestamp) VALUES (?, ?, ?)", (email, message.message, message.timestamp))
+    conn.commit()
+    conn.close()
+    return {"msg": "Message stored"}
+
+@app.get("/chat")
+async def get_chat():
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT user_email, message, timestamp FROM chat ORDER BY timestamp DESC LIMIT 50")
+    messages = [dict(row) for row in c.fetchall()]
+    conn.close()
+    return messages
+
+@app.post("/reaction")
+async def post_reaction(reaction: Reaction, token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email = payload.get("sub")
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("INSERT INTO reactions (user_email, emoji, timestamp) VALUES (?, ?, ?)", (email, reaction.emoji, reaction.timestamp))
+    conn.commit()
+    conn.close()
+    return {"msg": "Reaction stored"}
+
+@app.get("/reaction")
+async def get_reactions():
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT user_email, emoji, timestamp FROM reactions ORDER BY timestamp DESC LIMIT 50")
+    reactions = [dict(row) for row in c.fetchall()]
+    conn.close()
+    return reactions
 redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
 
 connected_clients = []  # Store active WebSocket connections
