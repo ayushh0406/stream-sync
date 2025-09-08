@@ -26,10 +26,10 @@
 - 📺 **HLS.js** (Video Streaming Player)
 
 ### **Backend:**
-- ⚡ **FastAPI** (Python Backend)
-- 🔌 **WebSockets** (Real-time Sync)
+- ⚡ **Node.js** (Express Backend)
+- 🔌 **WebSockets (Socket.IO)** (Real-time Sync)
 - 🔄 **Redis** (Caching & Syncing)
-- 🗄 **PostgreSQL/MongoDB** (Database)
+- 🗄 **SQLite** (Database)
 
 ### **Streaming & Performance:**
 - 📼 **FFmpeg** (Video Processing)
@@ -59,8 +59,8 @@ cd streamsync
 ### **2️⃣ Backend Setup**
 ```sh
 cd backend
-pip install -r requirements.txt
-uvicorn app:app --reload
+npm install
+node index.js
 ```
 ### **3️⃣ Frontend Setup**
 ```sh
@@ -76,7 +76,7 @@ docker run -d -p 6379:6379 redis
 ## 📖 API Endpoints
 | Method | Endpoint | Description |
 |--------|-------------|--------------|
-| GET | `/stream/{user_id}` | Fetch the current stream chunk |
+| GET | `/stream/:user_id` | Fetch the current stream chunk |
 | POST | `/sync` | Sync playback for all users |
 | WS | `/ws` | WebSockets connection for real-time sync |
 

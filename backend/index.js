@@ -1,4 +1,9 @@
 const express = require('express');
+const http = require('http');
+const redis = require('redis');
+const streamRouter = require('./stream');
+const syncRouter = require('./sync');
+const initWS = require('./ws');
 const sqlite3 = require('sqlite3').verbose();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
@@ -6,9 +11,13 @@ const cors = require('cors');
 
 const SECRET = 'streamsyncsupersecretkey';
 const db = new sqlite3.Database('streamsync.db');
+const redisClient = redis.createClient();
+redisClient.connect();
 
 const app = express();
 app.use(express.json());
+app.use('/stream', streamRouter);
+app.use('/sync', syncRouter);
 app.use(cors());
 
 // Init tables
@@ -84,4 +93,6 @@ app.get('/reaction', (req, res) => {
   });
 });
 
-app.listen(5000, () => console.log('Node backend running on 5000'));
+const server = http.createServer(app);
+initWS(server);
+server.listen(5000, () => console.log('Node backend running on 5000'));
