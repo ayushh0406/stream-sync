@@ -31,12 +31,20 @@ initDB();
 // Signup
 app.post('/signup', (req, res) => {
   const { email, password } = req.body;
+  // Email format validation
+  if (!/^\S+@\S+\.\S+$/.test(email)) {
+    return res.status(400).json({ detail: 'Invalid email format' });
+  }
+  // Password strength validation
+  if (!password || password.length < 8 || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+    return res.status(400).json({ detail: 'Password must be 8+ chars, include a number and uppercase.' });
+  }
   db.get('SELECT * FROM users WHERE email = ?', [email], (err, row) => {
-    if (row) return res.status(400).json({ detail: 'Email exists' });
-    const hashed = bcrypt.hashSync(password, 10);
+    if (row) return res.status(400).json({ detail: 'Email already registered' });
+    const hashed = bcrypt.hashSync(password, 12);
     db.run('INSERT INTO users (email, hashed_password) VALUES (?, ?)', [email, hashed], err => {
-      if (err) return res.status(500).json({ detail: 'DB error' });
-      res.json({ msg: 'Signup ok' });
+      if (err) return res.status(500).json({ detail: 'Database error' });
+      res.json({ msg: 'Signup successful' });
     });
   });
 });
