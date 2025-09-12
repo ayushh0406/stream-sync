@@ -76,6 +76,12 @@ function auth(req, res, next) {
 // Chat
 app.post('/chat', auth, (req, res) => {
   const { message, timestamp } = req.body;
+  if (!message || typeof message !== 'string' || message.length > 200) {
+    return res.status(400).json({ detail: 'Message required, max 200 chars.' });
+  }
+  if (!timestamp || typeof timestamp !== 'number') {
+    return res.status(400).json({ detail: 'Valid timestamp required.' });
+  }
   db.run('INSERT INTO chat (user_email, message, timestamp) VALUES (?, ?, ?)', [req.user, message, timestamp], err => {
     if (err) return res.status(500).json({ detail: 'DB error' });
     res.json({ msg: 'Chat ok' });
@@ -90,10 +96,30 @@ app.get('/chat', (req, res) => {
 // Reactions
 app.post('/reaction', auth, (req, res) => {
   const { emoji, timestamp } = req.body;
+  if (!emoji || typeof emoji !== 'string' || emoji.length > 20) {
+    return res.status(400).json({ detail: 'Emoji required, max 20 chars.' });
+  }
+  if (!timestamp || typeof timestamp !== 'number') {
+    return res.status(400).json({ detail: 'Valid timestamp required.' });
+  }
   db.run('INSERT INTO reactions (user_email, emoji, timestamp) VALUES (?, ?, ?)', [req.user, emoji, timestamp], err => {
     if (err) return res.status(500).json({ detail: 'DB error' });
     res.json({ msg: 'React ok' });
   });
+// Admin: clear chat
+app.post('/chat/clear', (req, res) => {
+  db.run('DELETE FROM chat', err => {
+    if (err) return res.status(500).json({ detail: 'DB error' });
+    res.json({ msg: 'Chat cleared' });
+  });
+});
+// Admin: clear reactions
+app.post('/reaction/clear', (req, res) => {
+  db.run('DELETE FROM reactions', err => {
+    if (err) return res.status(500).json({ detail: 'DB error' });
+    res.json({ msg: 'Reactions cleared' });
+  });
+});
 });
 app.get('/reaction', (req, res) => {
   db.all('SELECT user_email, emoji, timestamp FROM reactions ORDER BY timestamp DESC LIMIT 50', (err, rows) => {
