@@ -26,6 +26,8 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
+            {/* Global error toast */}
+            <div id="global-error-toast" className="fixed top-4 right-4 z-50"></div>
             {children}
           </AuthProvider>
         </ThemeProvider>
