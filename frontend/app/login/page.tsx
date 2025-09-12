@@ -9,6 +9,7 @@ import Spinner from "@/components/ui/spinner";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
@@ -62,17 +63,24 @@ export default function LoginPage() {
             placeholder="Email"
             value={email}
             onChange={e => setEmail(e.target.value)}
+            autoFocus
           />
           <div className="text-xs text-muted-foreground mt-1">Enter your registered email.</div>
         </div>
-        <div className="mb-4">
+        <div className="mb-4 relative">
           <Input
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="Password"
             value={password}
             onChange={e => setPassword(e.target.value)}
           />
+          <button type="button" className="absolute right-2 top-2 text-xs text-primary" onClick={() => setShowPassword(v => !v)}>
+            {showPassword ? "Hide" : "Show"}
+          </button>
           <div className="text-xs text-muted-foreground mt-1">Password is case-sensitive.</div>
+        </div>
+        <div className="text-right text-xs mb-2">
+          <a href="#" className="text-primary underline">Forgot password?</a>
         </div>
         {error && <div className="text-red-600 font-semibold mb-2">{error} {retryCount > 0 && `(Tried ${retryCount}x)`}</div>}
         {success && <div className="text-green-600 font-semibold mb-2">{success}</div>}
