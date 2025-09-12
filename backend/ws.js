@@ -4,7 +4,10 @@ const SECRET = 'streamsyncsupersecretkey';
 
 function initWS(server) {
   const io = new Server(server, { cors: { origin: '*' } });
+  module.exports.io = io;
   io.on('connection', (socket) => {
+  // Log connection
+  console.log('WebSocket connected:', socket.id);
     let userEmail = null;
     socket.on('auth', (token) => {
       try {
