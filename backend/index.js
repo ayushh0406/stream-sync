@@ -1,6 +1,11 @@
 const express = require('express');
+require('dotenv').config();
+const PORT = process.env.PORT || 5000;
+const SECRET = process.env.SECRET || 'streamsyncsupersecretkey';
 const http = require('http');
 const redis = require('redis');
+const { logRequest, rateLimit } = require('./utils');
+const healthRouter = require('./health');
 const streamRouter = require('./stream');
 const syncRouter = require('./sync');
 const initWS = require('./ws');
@@ -9,13 +14,15 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const cors = require('cors');
 
-const SECRET = 'streamsyncsupersecretkey';
 const db = new sqlite3.Database('streamsync.db');
 const redisClient = redis.createClient();
 redisClient.connect();
 
 const app = express();
 app.use(express.json());
+app.use(logRequest);
+app.use(rateLimit);
+app.use('/health', healthRouter);
 app.use('/stream', streamRouter);
 app.use('/sync', syncRouter);
 app.use(cors());
@@ -129,4 +136,4 @@ app.get('/reaction', (req, res) => {
 
 const server = http.createServer(app);
 initWS(server);
-server.listen(5000, () => console.log('Node backend running on 5000'));
+server.listen(PORT, () => console.log(`Node backend running on ${PORT}`));
